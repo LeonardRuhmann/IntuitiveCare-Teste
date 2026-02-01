@@ -2,6 +2,7 @@ import os
 import pandas as pd
 from src.services.ans_client import AnsDataClient
 from src.services.zip_processor import ZipProcessor
+from src.services.data_consolidator import DataConsolidator
 
 def main():
     print("--- STARTING ETL PIPELINE ---")
@@ -35,13 +36,13 @@ def main():
             df['SOURCE_FILE'] = os.path.basename(zip_file)
             all_data.append(df)
     
-    # Aggregation (Merging 3 quarters)
+    # Consolidation
     if all_data:
-        final_df = pd.concat(all_data, ignore_index=True)
-        print("\n--- FINAL RESULT ---")
-        print(f"Total Rows Processed: {len(final_df)}")
-        print("Sample Data:")
-        print(final_df[['DATA', 'DESCRICAO', 'VL_SALDO_FINAL', 'SOURCE_FILE']].head())
+        print("\n--- AGGREGATING DATA ---")
+        full_df = pd.concat(all_data, ignore_index=True)
+        
+        consolidator = DataConsolidator()
+        consolidator.consolidate(full_df)
     else:
         print("No data processed.")
 
