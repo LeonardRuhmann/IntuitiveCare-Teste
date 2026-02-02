@@ -3,6 +3,7 @@ import pandas as pd
 from src.services.ans_client import AnsDataClient
 from src.services.zip_processor import ZipProcessor
 from src.services.data_consolidator import DataConsolidator
+from src.services.data_validator import DataValidator
 
 def main():
     print("--- STARTING ETL PIPELINE ---")
@@ -43,8 +44,20 @@ def main():
         
         consolidator = DataConsolidator()
         consolidator.consolidate(full_df)
+
     else:
         print("No data processed.")
+
+    print("\n--- Data Transformation & Validation ---")
+    validator = DataValidator(output_dir='output')
+    
+    # Point to the file generated in the previous step
+    input_zip = "output/consolidado_despesas.zip"
+    
+    if os.path.exists(input_zip):
+        validator.validate_and_split(input_zip)
+    else:
+        print(f"Critical Error: Input file {input_zip} not found.")
 
 if __name__ == "__main__":
     main()

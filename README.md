@@ -1,5 +1,7 @@
 # IntuitiveCare-Teste
 
+## 1. TESTE DE INTEGRAÇÃO COM API PÚBLICA
+
 1.1. Acesso à API de Dados Abertos da ANS
 Arquitetura e Organização: Criei uma pasta services e a classe AnsDataClient para garantir a Separação de Responsabilidades. Isso evita misturar a lógica de conexão com o fluxo principal, tornando o código mais fácil de manter e escalar.
 
@@ -44,3 +46,26 @@ Justificativa: Essa abordagem segue o padrão de mercado e atua como uma estrat�
 Limitação Identificada - Dados Cadastrais (CNPJ):
 
 Constatou-se que os arquivos contábeis originais (fonte primária) contêm apenas o identificador da operadora (REG_ANS), sem as colunas CNPJ ou Razão Social. Nesta etapa de consolidação, optei por focar na limpeza dos dados financeiros. As colunas de identificação foram criadas no esquema final, mas mantidas vazias, visto que o preenchimento exigiria o cruzamento com uma base externa, o que foge ao escopo da limpeza pura dos arquivos CSV fornecidos.
+
+## 2. Validação e Qualidade de Dados
+
+### 2.1 Estratégia de Validação (Quarantine Pattern)
+
+Para garantir a confiabilidade dos dados sem comprometer a integridade financeira, foi implementada uma estratégia de **Soft Validation** com segregação de dados (Quarentena).
+
+**Regras de Validação Implementadas:**
+1.  **CNPJ:** Verificação matemática dos dígitos verificadores (Algoritmo Módulo 11) e formato (14 dígitos).
+2.  **Integridade Cadastral:** O campo `RazaoSocial` não pode ser vazio ou nulo.
+3.  **Consistência Financeira:** O campo `ValorDespesas` deve ser estritamente positivo (conforme requisito de negócio).
+
+**Trade-off Técnico: Exclusão vs. Quarentena**
+Ao encontrar registros inválidos (ex: CNPJ incorreto), a decisão técnica foi **não excluir** o registro sumariamente.
+
+* **Abordagem Escolhida:** Segregação em `data_quarantine.csv` com flag de erro.
+* **Justificativa:** Em sistemas financeiros e contábeis, excluir uma linha apenas porque um dado cadastral está errado (como um dígito de CNPJ) gera "furos" no balanço financeiro final. O valor monetário é real e precisa ser contabilizado, mesmo que a atribuição cadastral precise de correção manual.
+* **Prós:**
+    * Preservação do volume financeiro total (Integridade Contábil).
+    * Rastreabilidade (Auditoria) para correção posterior pelo time de Backoffice.
+* **Contras:**
+    * Aumenta a complexidade do pipeline (gera 2 saídas em vez de 1).
+    * Requer armazenamento para dados "sujos".
