@@ -1,5 +1,76 @@
 # IntuitiveCare-Teste - Documentação Técnica
 
+Este repositório contém a solução para o teste técnico de Engenharia de Dados. O projeto consiste em um pipeline ETL (Extract, Transform, Load) para coletar, limpar, enriquecer e agregar dados financeiros e cadastrais de operadoras de planos de saúde a partir do portal de dados abertos da ANS.
+
+## 🔄 Fluxo do Projeto (Pipeline)
+
+O pipeline executa as seguintes etapas sequencialmente:
+
+1.  **Scraping e Identificação:** O sistema acessa o site da ANS e identifica os arquivos de demonstrações contábeis (ZIP) mais recentes (padrão Trimestral).
+2.  **Extração e Transformação (Stream):**
+    * Baixa os arquivos ZIP utilizando *streaming* para economizar memória.
+    * Lê o conteúdo em memória e aplica filtros (Regex) para isolar despesas assistenciais.
+    * Normaliza dados numéricos e datas.
+3.  **Consolidação:** Unifica os dados dos trimestres processados em um único arquivo temporário.
+4.  **Enriquecimento (Join):**
+    * Baixa a base cadastral de operadoras ativas.
+    * Realiza o cruzamento (Join) entre dados financeiros e cadastrais via `REG_ANS`.
+5.  **Validação (Quality Gate):** Separa registros inválidos ou inconsistentes em um arquivo de "Quarentena", mantendo a integridade contábil dos dados válidos.
+6.  **Agregação e Entrega:**
+    * Calcula totais, médias trimestrais e desvio padrão.
+    * Gera o arquivo final compactado `Teste_{Nome}.zip`.
+
+---
+
+## 🚀 Como Executar o Projeto
+
+Siga os passos abaixo para rodar o pipeline em seu ambiente local.
+
+### Pré-requisitos
+* **Python 3.8+** instalado.
+* **Git** instalado.
+
+### Passo a Passo
+
+1.  **Clone o repositório:**
+    ```bash
+    git clone [https://github.com/LeonardRuhmann/IntuitiveCare-Teste.git](https://github.com/LeonardRuhmann/IntuitiveCare-Teste.git)
+    cd IntuitiveCare-Teste
+    ```
+
+2.  **Crie e ative um ambiente virtual (Recomendado):**
+    * *Linux/Mac:*
+        ```bash
+        python3 -m venv venv
+        source venv/bin/activate
+        ```
+    * *Windows:*
+        ```bash
+        python -m venv venv
+        .\venv\Scripts\activate
+        ```
+
+3.  **Instale as dependências:**
+    ```bash
+    pip install -r requirements.txt
+    ```
+
+4.  **Execute o Pipeline:**
+    ```bash
+    python src/main.py
+    ```
+
+5.  **Verifique os Resultados:**
+    Os arquivos gerados estarão na pasta `output/`:
+    * `Teste_Leonardo_Ruhmann.zip` (Arquivo Final)
+    * `data_quarantine.csv` (Dados auditados/inválidos)
+
+---
+
+## 📚 Documentação Técnica e Decisões Arquiteturais
+
+Abaixo detalho as decisões de design, trade-offs escolhidos e estratégias de resolução de problemas adotadas durante o desenvolvimento.
+
 ## 1. Pipeline de Extração e Transformação (ETL)
 
 ### 1.1. Acesso à API e Arquitetura
