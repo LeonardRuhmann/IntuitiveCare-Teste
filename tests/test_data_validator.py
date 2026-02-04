@@ -84,16 +84,5 @@ class TestDataValidator(unittest.TestCase):
         mock_read_csv.return_value = mock_data
 
         self.validator.validate_and_split(self.sample_zip_path)
-
-        # Retrieve the calls to to_csv.
-        # calls are (args, kwargs). Since to_csv is a method, the first arg is implicit self (the dataframe) 
-        # BUT when patching pd.DataFrame.to_csv as an unbound method, the first arg passed to the mock IS the dataframe instance.
-        
-        # mock_to_csv.call_args_list will contains [call(clean_df_instance, path...), call(quarantine_df_instance, path...)]
-        # However, verifying the exact dataframe content in a mock call is tricky because it's passed by reference and might be mutated (unlikely here but still).
-        # A simpler way is to trust logical separation: 1 valid, 1 invalid -> 1 clean row, 1 quarantine row.
-        
-        # Let's rely on the verifying that to_csv is called. The logic is internal to the method.
-        # If we truly wanted to verify the split, we could mock `to_csv` to capture the df.
         
         self.assertEqual(mock_to_csv.call_count, 2)
