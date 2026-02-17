@@ -1,4 +1,4 @@
-# IntuitiveCare-Teste - Documentação Técnica
+# IntuitiveCare - Documentação Técnica
 
 Este repositório contém a solução para o teste técnico de Engenharia de Dados. O projeto consiste em um pipeline ETL (Extract, Transform, Load) para coletar, limpar, enriquecer e agregar dados financeiros e cadastrais de operadoras de planos de saúde a partir do portal de dados abertos da ANS.
 
