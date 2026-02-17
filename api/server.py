@@ -18,10 +18,15 @@ app = FastAPI(
     version="1.0.0",
 )
 
-# CORS: allow the Vue.js frontend (Vite runs on port 5173 by default)
+# CORS: Configure allowed origins for local dev and production
+origins = [
+    "http://localhost:5173",  # Local development
+    "https://ans-healthcare-analytics.netlify.app",  # Production frontend
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],
+    allow_origins=origins,
     allow_methods=["*"],
     allow_headers=["*"],
 )
