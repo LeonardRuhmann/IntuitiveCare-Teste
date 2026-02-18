@@ -167,6 +167,13 @@ run_frontend() {
         log "Installing frontend dependencies..."
         npm install
     fi
+
+    # Auto-setup .env if missing (DX)
+    if [ ! -f ".env" ] && [ -f ".env.example" ]; then
+        log "Creating frontend .env from example..."
+        cp .env.example .env
+    fi
+
     log "Starting Vite (Dev Server)..."
     npm run dev
 }
